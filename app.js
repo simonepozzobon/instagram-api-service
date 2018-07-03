@@ -1,5 +1,3 @@
-
-
 // Dependencies
 var fs = require('fs')
 var request = require('request')
@@ -27,7 +25,7 @@ router.post('/save-instagram-pic', (req, res) => {
             dest: __dirname + '/storage/image.jpeg'
         }).then(({ filename, image }) => {
             console.log('File saved to', filename)
-            uploadInstagram(filename, req.body.caption).then(() => {
+            uploadInstagram(filename, req.body.caption, req.body.user, req.body.password).then(() => {
                 res.json({ message: 'posted', success: true })
             }).catch(err => {
                 res.json({ message: 'error', success: false })
@@ -40,13 +38,13 @@ router.post('/save-instagram-pic', (req, res) => {
 
 })
 
-var uploadInstagram = function(filename, caption) {
+var uploadInstagram = function(filename, caption, user, password) {
     return new Promise((resolve, reject) => {
         var Client = require('instagram-private-api').V1
-        var device = new Client.Device(login.user)
-        var storage = new Client.CookieFileStorage(__dirname + '/cookies/'+login.user+'.json')
+        var device = new Client.Device(user)
+        var storage = new Client.CookieFileStorage(__dirname + '/cookies/'+user+'.json')
 
-        Client.Session.create(device, storage, login.user, login.password).then(function(session) {
+        Client.Session.create(device, storage, user, password).then(function(session) {
             Client.Upload.photo(session, filename)
             	.then(function(upload) {
             		return Client.Media.configurePhoto(session, upload.params.uploadId, caption);
